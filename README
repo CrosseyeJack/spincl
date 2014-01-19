@@ -1,0 +1,83 @@
+DESCRIPTION
+
+spincl is a command-line utility for executing spi commands with the 
+Broadcom bcm2835.  It was developed and tested on a Raspberry Pi single-board
+computer model B.  The utility is based on the bcm2835 C library developed
+by Mike McCauley of Open System Consultants, http://www.open.com.au/mikem/bcm2835/.
+
+Invoking spincl results in a full-duplex SPI transfer.  Options include the
+the SPI clock frequency, SPI Mode, chip select designation, and chip select
+polarity.  Invoking spincl requires root privilege.  If no command-line arguments
+are included or if there are any command-line argument errors, a "usage statement"
+will be printed on stdout similar to below.
+
+
+USAGE
+
+spincl [options] len [xmit bytes]\n");
+
+Invoking spincl results in a full-duplex SPI transfer of a specified
+  number of bytes.  Additionally, it can be used to set the appropriate
+  GPIO pins to their respective SPI configurations or return them
+  to GPIO input configuration.  Options include the SPI clock frequency,
+  SPI Mode, chip select designation, chip select polarity and an
+  initialization option (spi_begin and spi_end).  spincl must be invoked
+  with root privileges.
+
+The following are the options, which must be a single letter
+  preceded by a '-' and followed by another character.
+  -ix where x is the SPI init option, b[egin] or e[nd]
+    The begin option must be executed before any transfer can happen
+      It may be included with a transfer.
+    The end option will return the SPI pins to GPIO inputs.
+      It may be included with a transfer.
+  -mx where x is the SPI mode, 0, 1, 2, or 3
+  -cx where x is the exponent of 2 of the clock divider. Allowed values
+    are 0 through 15.  Valid clock divider values are powers of 2.
+    Corresponding frequencies are specified in bcm2835.h.
+  -sx where x is 0 (CS0), 1 (CS1), 2 (CS1&CS2), or 3 (None)
+  -px where x is chip select polarity, 0(LOW) or 1(HIGH)
+
+len: The number of bytes to be transmitted and received (full duplex).
+
+xmit bytes: The bytes to be transmitted if specified.  If none are
+  specified, 0s will be transmitted, which may be the case when only
+  the received data is relevant.
+
+
+EXAMPLES
+
+Use spincl to just intialize the SPI pins
+  spincl -ib
+
+Use spincl to intialize the SPI pins and read three bytes (note xmit bytes
+are not specified).  Mode is 2, clock frequency is 15.625Mhz (see bcm2835.h),
+chip select is 0, and polarity is active low.
+  spincl -ib -m2 -c4 -s0 -p0 3
+
+Use spincl to transmit 2 bytes (specified) and read back 2 bytes, which may or
+may not be relevant.  Mode is 1, clock frequency is 7.8125MHz, chip select is 1, 
+and polarity is active high.  Note that no initialization has been specified so 
+SPI pins must have been previously initialized.
+  spincl -m1 -c5 -s1 -p1 2 0x5c 0x13
+  
+Use spincl to read two byte with mode 3, clock frequency of 15.625Mhz, and no
+chip select (done by user some other way).  When the SPI tranfer has been completed,
+the SPI pins will be returned to GPIO inputs.
+  spincl -ie -m3 -c4 -s3 2
+  
+Use spincl to just return the SPI pins to GPIO inputs
+  spincl -ie
+
+
+BUILD
+
+The Makefile included assumes that the bcm2835 library has been installed.  In
+other words, bcm2835.h is in /usr/local/include and libbcm2835.a is in
+/usr/local/lib.  To "make" the executable, type make at the command-line prompt
+from the spincl directory.  "make install" will intall spincl in /opt/aeris/bin/
+and set the owner and group to root with the appropriate permissions.
+
+
+
+
