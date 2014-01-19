@@ -145,8 +145,10 @@ int main (int argc, char **argv)
     bcm2835_close();
 
     // print received data	
+	// ***Crosseye Jack*** remove whitespace between received bytes
+	// TODO - Replace human readable error messages with machine readable versions
     for (i = 0; i < len; i++) {
-        printf("0x%02x ", rbuf[i]);
+        printf("0x%02x", rbuf[i]);
     }
     printf("\n");
 	
